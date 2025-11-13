@@ -1,5 +1,3 @@
-好的，这是您提供的英文 README 的中文翻译版本：
-
 # IBKR MCP 服务器
 
 一个 Model Context Protocol (MCP) 服务器，旨在通过 TWS API 为 AI 模型提供安全访问盈透证券 (IBKR) 的交易数据和功能。
