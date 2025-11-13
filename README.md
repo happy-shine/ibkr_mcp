@@ -27,7 +27,7 @@ This software is for educational and development purposes. Use at your own risk.
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/happy-shine/ibkr_mcp.git
    cd ibkr_mcp
    ```
 
