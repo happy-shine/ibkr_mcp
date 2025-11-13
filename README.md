@@ -74,6 +74,7 @@ The server will:
 - `get_historical_data(symbol, duration, bar_size)` - Get historical price data
 - `get_market_data(symbol)` - Get real-time market data
 - `get_contract_details(symbol)` - Get contract specifications
+- `get_option_chain` - Get Option data
 
 #### Trading Tools
 - `place_order(symbol, action, quantity, order_type, ...)` - Place buy/sell orders

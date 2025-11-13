@@ -186,7 +186,10 @@ async def get_contract_details(
     symbol: str,
     sec_type: str = "STK",
     exchange: str = "SMART",
-    currency: str = "USD"
+    currency: str = "USD",
+    strike: Optional[float] = None,
+    expiry: Optional[str] = None,
+    right: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Get contract details for a security.
@@ -194,9 +197,12 @@ async def get_contract_details(
     Args:
         ib: IBAPIClient connection instance
         symbol: Stock symbol
-        sec_type: Security type
+        sec_type: Security type (STK, OPT, FUT, etc.)
         exchange: Exchange
         currency: Currency
+        strike: Strike price for options (optional)
+        expiry: Expiry date for options in YYYYMMDD format (optional)
+        right: Option right (C for Call, P for Put) (optional)
 
     Returns:
         List of contract detail dictionaries
@@ -208,6 +214,15 @@ async def get_contract_details(
         contract.secType = sec_type
         contract.exchange = exchange
         contract.currency = currency
+
+        # Add option-specific parameters if provided
+        if sec_type == "OPT":
+            if strike is not None:
+                contract.strike = strike
+            if expiry is not None:
+                contract.lastTradeDateOrContractMonth = expiry
+            if right is not None:
+                contract.right = right
 
         # Get request ID and clear previous data
         req_id = ib.get_next_request_id()
@@ -244,11 +259,90 @@ async def get_contract_details(
                 "tradingHours": detail.tradingHours,
                 "liquidHours": detail.liquidHours
             }
+
+            # Add option-specific fields if this is an option contract
+            if contract.secType == "OPT":
+                contract_info.update({
+                    "strike": getattr(contract, 'strike', None),
+                    "expiry": getattr(contract, 'lastTradeDateOrContractMonth', None),
+                    "right": getattr(contract, 'right', None),
+                    "multiplier": getattr(contract, 'multiplier', None)
+                })
             result.append(contract_info)
         
         logger.info(f"Retrieved {len(result)} contract details for {symbol}")
         return result
-        
+
     except Exception as e:
         logger.error(f"Error getting contract details for {symbol}: {e}")
+        raise
+
+
+async def get_option_chain(
+    ib: IBAPIClient,
+    symbol: str,
+    exchange: str = "",
+    underlying_sec_type: str = "STK",
+    underlying_con_id: Optional[int] = None
+) -> List[Dict[str, Any]]:
+    """
+    Get option chain parameters (expiries and strikes) for an underlying security.
+
+    Args:
+        ib: IBAPIClient connection instance
+        symbol: Underlying symbol
+        exchange: Exchange (empty string for all exchanges)
+        underlying_sec_type: Underlying security type (STK, etc.)
+        underlying_con_id: Contract ID of underlying (optional, will be resolved if not provided)
+
+    Returns:
+        List of option parameter dictionaries containing expiries and strikes
+    """
+    try:
+        # If no contract ID provided, get it first by requesting contract details
+        if underlying_con_id is None:
+            logger.info(f"Resolving contract ID for {symbol}")
+            contract_details = await get_contract_details(
+                ib, symbol, underlying_sec_type, "SMART", "USD"
+            )
+
+            if not contract_details:
+                raise ValueError(f"Could not find contract details for {symbol}")
+
+            # Use the first contract's ID
+            underlying_con_id = contract_details[0]["conId"]
+            logger.info(f"Resolved contract ID for {symbol}: {underlying_con_id}")
+
+        # Get request ID and clear previous data
+        req_id = ib.get_next_request_id()
+        if req_id in ib.option_params:
+            del ib.option_params[req_id]
+
+        # Request option chain parameters
+        logger.info(f"Requesting option chain for {symbol} (conId: {underlying_con_id})")
+        ib.reqSecDefOptParams(req_id, symbol, exchange, underlying_sec_type, underlying_con_id)
+
+        # Wait for option parameters to be received
+        await asyncio.sleep(3)
+
+        # Get option parameters from the client
+        option_params = ib.option_params.get(req_id, [])
+
+        result = []
+        for param in option_params:
+            param_info = {
+                "exchange": param.get('exchange', ''),
+                "underlyingConId": param.get('underlyingConId', 0),
+                "tradingClass": param.get('tradingClass', ''),
+                "multiplier": param.get('multiplier', ''),
+                "expirations": param.get('expirations', []),
+                "strikes": param.get('strikes', [])
+            }
+            result.append(param_info)
+
+        logger.info(f"Retrieved option chain parameters for {symbol} from {len(result)} exchanges")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error getting option chain for {symbol}: {e}")
         raise

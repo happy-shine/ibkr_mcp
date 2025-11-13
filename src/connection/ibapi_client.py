@@ -39,6 +39,7 @@ class IBAPIClient(EWrapper, EClient):
         self.historical_data = {}
         self.market_data = {}
         self.contract_details = {}
+        self.option_params = {}  # For option chain parameters
         
         # Event handling
         self.events = {}
@@ -276,6 +277,28 @@ class IBAPIClient(EWrapper, EClient):
         """Called when contract details are complete."""
         logger.debug(f"Contract details complete for request {reqId}")
 
+    def securityDefinitionOptionParameter(self, reqId: int, exchange: str,
+                                        underlyingConId: int, tradingClass: str,
+                                        multiplier: str, expirations, strikes):
+        """Receive option chain parameters."""
+        if reqId not in self.option_params:
+            self.option_params[reqId] = []
+
+        option_param = {
+            'exchange': exchange,
+            'underlyingConId': underlyingConId,
+            'tradingClass': tradingClass,
+            'multiplier': multiplier,
+            'expirations': list(expirations) if expirations else [],
+            'strikes': list(strikes) if strikes else []
+        }
+        self.option_params[reqId].append(option_param)
+        logger.debug(f"Received option parameters for request {reqId}, exchange {exchange}")
+
+    def securityDefinitionOptionParameterEnd(self, reqId: int):
+        """Called when option parameters are complete."""
+        logger.debug(f"Option parameters complete for request {reqId}")
+
     def currentTime(self, time: int):
         """Receive current server time."""
         logger.debug(f"Server time: {time}")
@@ -319,6 +342,10 @@ class IBAPIClient(EWrapper, EClient):
         """Get current trades as dictionary."""
         return self.trades.copy()
 
+    def get_option_params_dict(self) -> Dict[int, Any]:
+        """Get current option parameters as dictionary."""
+        return self.option_params.copy()
+
     def clear_data(self):
         """Clear all cached data."""
         self.positions.clear()
@@ -328,3 +355,4 @@ class IBAPIClient(EWrapper, EClient):
         self.historical_data.clear()
         self.market_data.clear()
         self.contract_details.clear()
+        self.option_params.clear()

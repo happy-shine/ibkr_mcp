@@ -71,6 +71,7 @@ python run.py
 -   `get_historical_data(symbol, duration, bar_size)` - 获取历史价格数据
 -   `get_market_data(symbol)` - 获取实时市场数据
 -   `get_contract_details(symbol)` - 获取合约规格
+- - `get_option_chain` - 获取期权数据
 
 #### 交易工具
 -   `place_order(symbol, action, quantity, order_type, ...)` - 下达买入/卖出订单

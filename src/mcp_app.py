@@ -1,10 +1,9 @@
 """
 MCP Application - FastMCP server with IBKR tools integration.
 """
-import asyncio
 import logging
 from typing import Any, Dict, List, Optional
-from fastmcp import FastMCP, Context
+from fastmcp import FastMCP
 
 from config.validators import Config
 from src.connection.manager import ConnectionManager
@@ -136,23 +135,55 @@ class IBKRMCPServer:
             symbol: str,
             sec_type: str = "STK",
             exchange: str = "SMART",
-            currency: str = "USD"
+            currency: str = "USD",
+            strike: Optional[float] = None,
+            expiry: Optional[str] = None,
+            right: Optional[str] = None
         ) -> List[Dict[str, Any]]:
             """
             Get contract details for a security.
 
             Args:
                 symbol: Stock symbol
-                sec_type: Security type
+                sec_type: Security type (STK, OPT, FUT, etc.)
                 exchange: Exchange
                 currency: Currency
+                strike: Strike price for options (optional)
+                expiry: Expiry date for options in YYYYMMDD format (optional)
+                right: Option right (C for Call, P for Put) (optional)
 
             Returns:
                 List of contract detail dictionaries
             """
             ib = self.connection_manager.get_ib()
-            return await historical_tools.get_contract_details(ib, symbol, sec_type, exchange, currency)
-        
+            return await historical_tools.get_contract_details(
+                ib, symbol, sec_type, exchange, currency, strike, expiry, right
+            )
+
+        @self.app.tool
+        async def get_option_chain(
+            symbol: str,
+            exchange: str = "",
+            underlying_sec_type: str = "STK",
+            underlying_con_id: Optional[int] = None
+        ) -> List[Dict[str, Any]]:
+            """
+            Get option chain parameters (expiries and strikes) for an underlying security.
+
+            Args:
+                symbol: Underlying symbol
+                exchange: Exchange (empty string for all exchanges)
+                underlying_sec_type: Underlying security type (STK, etc.)
+                underlying_con_id: Contract ID of underlying (optional, will be resolved if not provided)
+
+            Returns:
+                List of option parameter dictionaries containing expiries and strikes
+            """
+            ib = self.connection_manager.get_ib()
+            return await historical_tools.get_option_chain(
+                ib, symbol, exchange, underlying_sec_type, underlying_con_id
+            )
+
         # Trading tools
         @self.app.tool
         async def place_order(
