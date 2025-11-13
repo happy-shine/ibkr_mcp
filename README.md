@@ -47,34 +47,6 @@ This software is for educational and development purposes. Use at your own risk.
    # Edit config/config.yaml with your settings
    ```
 
-## ⚙️ Configuration
-
-Edit `config/config.yaml`:
-
-```yaml
-# Interactive Brokers TWS Configuration
-ibkr:
-  client_id: 1                   # Unique client ID
-  host: "127.0.0.1"              # TWS host
-  port: 7497                     # TWS port (7497=paper, 7496=live)
-  read_only: true                # Enable read-only mode
-  allow_short_selling: false     # Allow short selling
-  order_types: ["LMT", "MKT"]    # Allowed order types
-  tif_types: ["DAY", "GTC"]      # Allowed time-in-force types
-
-# MCP Server Configuration
-mcp:
-  host: "127.0.0.1"              # MCP server host
-  port: 8000                     # MCP server port
-  title: "IBKR MCP Server"       # Server title
-  description: "AI interface for IBKR trading"
-
-# Connection Management
-connection:
-  heartbeat_interval: 30         # Heartbeat interval (seconds)
-  reconnect_attempts: 3          # Max reconnection attempts
-  reconnect_delay: 5             # Delay between attempts (seconds)
-```
 
 ## 🚀 Usage
 
