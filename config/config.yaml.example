@@ -1,0 +1,37 @@
+# IBKR MCP Server Configuration
+
+# Interactive Brokers TWS Configuration
+ibkr:
+  client_id: 1
+  host: "127.0.0.1"
+  port: 7497  # TWS Paper Trading port (7496 for live trading)
+  read_only: true
+  allow_short_selling: false
+  order_types:
+    - "LMT"  # Limit Order
+    - "MKT"  # Market Order
+    - "STP"  # Stop Order
+    - "STP LMT"  # Stop Limit Order
+  tif_types:
+    - "DAY"  # Day Order
+    - "GTC"  # Good Till Cancelled
+    - "IOC"  # Immediate or Cancel
+    - "FOK"  # Fill or Kill
+
+# MCP Server Configuration
+mcp:
+  host: "127.0.0.1"
+  port: 8000
+  title: "IBKR MCP Server"
+  description: "AI interface for Interactive Brokers data and trading"
+
+# Connection Management
+connection:
+  heartbeat_interval: 30  # seconds
+  reconnect_attempts: 3
+  reconnect_delay: 5  # seconds
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
