@@ -27,7 +27,8 @@ async def place_order(
     sec_type: str = "STK",
     strike: Optional[float] = None,
     expiry: Optional[str] = None,
-    right: Optional[str] = None
+    right: Optional[str] = None,
+    outside_rth: bool = False
 ) -> Dict[str, Any]:
     """
     Place a trading order.
@@ -48,6 +49,7 @@ async def place_order(
         strike: Strike price for options
         expiry: Expiry date for options (YYYYMMDD format)
         right: Option right (C for Call, P for Put)
+        outside_rth: Allow order execution outside regular trading hours (pre-market and after-hours)
 
     Returns:
         Dictionary with order information
@@ -116,6 +118,7 @@ async def place_order(
         order.tif = tif
         order.eTradeOnly = False
         order.firmQuoteOnly = False
+        order.outsideRth = outside_rth  # 允许盘前盘后交易
 
         # Set prices based on order type
         if order_type in ["LMT", "STP LMT"]:

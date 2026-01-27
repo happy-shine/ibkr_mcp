@@ -199,7 +199,8 @@ class IBKRMCPServer:
             sec_type: str = "STK",
             strike: Optional[float] = None,
             expiry: Optional[str] = None,
-            right: Optional[str] = None
+            right: Optional[str] = None,
+            outside_rth: bool = False
         ) -> Dict[str, Any]:
             """
             Place a trading order.
@@ -218,6 +219,7 @@ class IBKRMCPServer:
                 strike: Strike price for options
                 expiry: Expiry date for options (YYYYMMDD format)
                 right: Option right (C for Call, P for Put)
+                outside_rth: Allow order execution outside regular trading hours (pre-market and after-hours)
 
             Returns:
                 Dictionary with order information
@@ -227,7 +229,7 @@ class IBKRMCPServer:
                 res = await trading_tools.place_order(
                     ib, self.config, symbol, action, quantity, order_type,
                     limit_price, stop_price, tif, exchange, currency, sec_type,
-                    strike, expiry, right
+                    strike, expiry, right, outside_rth
                 )
                 return res
             except Exception as e:
