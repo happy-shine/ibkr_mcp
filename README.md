@@ -2,6 +2,9 @@
 
 A Model Context Protocol (MCP) server that provides AI models with secure access to Interactive Brokers (IBKR) trading data and functionality through the TWS API.
 
+<a href="https://glama.ai/mcp/servers/@happy-shine/ibkr_mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@happy-shine/ibkr_mcp/badge" alt="IBKR Server MCP server" />
+</a>
 
 ## ⚠️⚠️⚠️ Disclaimer ⚠️⚠️⚠️
 
