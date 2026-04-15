@@ -4,9 +4,9 @@
 ibkr:
   client_id: 1
   host: "127.0.0.1"
-  port: 7497  # TWS Paper Trading port (7496 for live trading)
+  port: 7496  # TWS Live Trading port
   read_only: false
-  allow_short_selling: true
+  allow_short_selling: false
   order_types:
     - "LMT"  # Limit Order
     - "MKT"  # Market Order
@@ -24,7 +24,7 @@ mcp:
   port: 8000
   title: "IBKR MCP Server"
   description: "AI interface for Interactive Brokers data and trading"
-  
+
 # Connection Management
 connection:
   heartbeat_interval: 30  # seconds

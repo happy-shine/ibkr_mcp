@@ -181,6 +181,65 @@ async def get_market_data(
         raise
 
 
+async def get_quote_from_history(
+    ib: IBAPIClient,
+    symbol: str,
+    exchange: str = "SMART",
+    currency: str = "USD"
+) -> Dict[str, Any]:
+    """
+    Get the latest price info using historical data (no market data subscription needed).
+    Fetches the last 2 trading days of daily bars and returns the most recent one.
+
+    Args:
+        ib: IBAPIClient connection instance
+        symbol: Stock symbol
+        exchange: Exchange
+        currency: Currency
+
+    Returns:
+        Dictionary with latest OHLCV data from most recent trading day
+    """
+    try:
+        bars = await get_historical_data(
+            ib, symbol,
+            end_date_time="",
+            duration="2 D",
+            bar_size="1 day",
+            what_to_show="TRADES",
+            use_rth=True,
+            exchange=exchange,
+            currency=currency,
+        )
+
+        if not bars:
+            return {
+                "symbol": symbol,
+                "exchange": exchange,
+                "currency": currency,
+                "error": "No historical data returned",
+            }
+
+        latest = bars[-1]
+        return {
+            "symbol": symbol,
+            "exchange": exchange,
+            "currency": currency,
+            "date": latest["date"],
+            "open": latest["open"],
+            "high": latest["high"],
+            "low": latest["low"],
+            "close": latest["close"],
+            "volume": latest["volume"],
+            "average": latest["average"],
+            "note": "Last trading day close (no real-time subscription)",
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting quote from history for {symbol}: {e}")
+        raise
+
+
 async def get_contract_details(
     ib: IBAPIClient,
     symbol: str,
